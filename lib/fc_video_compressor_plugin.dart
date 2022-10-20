@@ -45,8 +45,8 @@ class FcVideoCompressorPlugin {
     return FcVideoCompressorPluginPlatform.instance.cancelCompression();
   }
 
-  static Future<bool?> deleteAllCache() async {
-    return FcVideoCompressorPluginPlatform.instance.deleteAllCache();
-  }
+  // static Future<bool?> deleteAllCache() async {
+  //   return FcVideoCompressorPluginPlatform.instance.deleteAllCache();
+  // }
 
 }

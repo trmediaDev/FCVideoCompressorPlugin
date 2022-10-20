@@ -80,11 +80,11 @@ abstract class FcVideoCompressorPluginPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  /// delete the cache folder, please do not put other things
-  /// in the folder of this plugin, it will be cleared
-  Future<bool?> deleteAllCache() async {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  // /// delete the cache folder, please do not put other things
+  // /// in the folder of this plugin, it will be cleared
+  // Future<bool?> deleteAllCache() async {
+  //   throw UnimplementedError('platformVersion() has not been implemented.');
+  // }
 
 
 }

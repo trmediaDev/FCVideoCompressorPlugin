@@ -90,12 +90,12 @@ class MethodChannelFcVideoCompressorPlugin extends FcVideoCompressorPluginPlatfo
     await _invoke<void>('cancelCompression');
   }
 
-  /// delete the cache folder, please do not put other things
-  /// in the folder of this plugin, it will be cleared
-  @override
-  Future<bool?> deleteAllCache() async {
-    return await _invoke<bool>('deleteAllCache');
-  }
+  // /// delete the cache folder, please do not put other things
+  // /// in the folder of this plugin, it will be cleared
+  // @override
+  // Future<bool?> deleteAllCache() async {
+  //   return await _invoke<bool>('deleteAllCache');
+  // }
 
 
 
