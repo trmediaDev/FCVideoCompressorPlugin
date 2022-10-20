@@ -50,17 +50,12 @@ $  pub get
 Now in your `Dart` code, you can use:
 
 ````dart
-import 'package:video_compress/fc_video_compressor_plugin.dart';
+
+import 'package:fc_video_compressor_plugin/fc_video_compressor_plugin.dart';
+
 ````
 
 # How to use
-
-### Imports
-
-````dart
-import 'package:video_compress/fc_video_compressor_plugin.dart';
-    
-````
 
 ## Video compression
 

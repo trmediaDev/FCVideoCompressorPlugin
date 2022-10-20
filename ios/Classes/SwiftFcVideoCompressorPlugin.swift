@@ -188,8 +188,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         let audioInputSettingsDict: [String:Any] = [
             AVFormatIDKey : kAudioFormatMPEG4AAC,
                                            AVNumberOfChannelsKey : 2,
-                                           AVSampleRateKey : 32000.0,
-                                           AVEncoderBitRateKey: 96000
+                                           AVSampleRateKey : 44100.0,
+                                           AVEncoderBitRateKey: 128000
         ]
         
        
@@ -203,7 +203,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             if(audioTrack != nil) {
                 let audioOutputSettingsDict: [String : Any] = [
                             AVFormatIDKey: kAudioFormatLinearPCM,
-                            AVSampleRateKey: 32000
+                            AVSampleRateKey: 44100
                 ]
                 audioReaderOutput = AVAssetReaderTrackOutput(track: audioTrack!, outputSettings: audioOutputSettingsDict)
                 audioReader = try! AVAssetReader(asset: videoAsset)
