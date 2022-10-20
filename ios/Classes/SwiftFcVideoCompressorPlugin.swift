@@ -345,7 +345,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         
         let duration = asset.duration.seconds * 1000
         let filesize = track.totalSampleDataLength
-        
+
         let size = track.naturalSize.applying(track.preferredTransform)
         
         let width = abs(size.width)
@@ -359,7 +359,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             "height":height,
             "duration":duration,
             "filesize":filesize,
-            "orientation":orientation
+            "orientation":orientation,
+            "isCancle":false,
             ] as [String : Any?]
         return dictionary
     }
