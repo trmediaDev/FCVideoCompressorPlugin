@@ -83,8 +83,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                 width: width,
                 height: height,
                 result:result)
-            
-//            result(true)
+        
         case "setLogLevel":
             result(true)
         default:
@@ -265,9 +264,11 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
 
                                                 self.videoWriter?.finishWriting(completionHandler: {() -> Void in
 //                                                   result(destination)
-                                                    print(destination)
+//                                                    print(destination)
+                                            
                                                     
                                                     var json = self.getMediaInfoJson(destination.absoluteString)
+                                                    json["isCancel"]=false
                                                     let jsonString = Utility.keyValueToJson(json)
                                                     return result(jsonString);
                                                 })
@@ -289,8 +290,9 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                             else {
                                 self.videoWriter?.finishWriting(completionHandler: {() -> Void in
 //                                    result(destination)
-                                    print(destination)
+//                                    print(destination)
                                     var json = self.getMediaInfoJson(destination.absoluteString)
+                                    json["isCancel"]=false
                                     let jsonString = Utility.keyValueToJson(json)
                                     return result(jsonString);
                                 })
