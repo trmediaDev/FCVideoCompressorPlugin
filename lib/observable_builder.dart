@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'dart:ui';
 
+import 'package:rxdart/rxdart.dart';
+
 class ObservableBuilder<T> {
-  StreamController<T> _observable = StreamController();
+  var _observable = BehaviorSubject<T>();
   bool notSubscribed = true;
 
   void next(T value) {
@@ -19,7 +21,7 @@ class ObservableBuilder<T> {
       _observable.close();
 
       // Create a new instance to avoid errors
-      _observable = StreamController();
+      _observable =BehaviorSubject<T>();
     });
   }
 }
