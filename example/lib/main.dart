@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final outputPath = "${(await path_provider.getTemporaryDirectory())
         .path}/${DateTime
         .now()
-        .microsecondsSinceEpoch}_compressed.mp4";
+        .microsecondsSinceEpoch}_compressed.mov";
     await AssetPicker.permissionCheck();
     final List<AssetEntity>? result = await AssetPicker.pickAssets(context,pickerConfig: AssetPickerConfig(
         requestType: RequestType.video,
@@ -85,34 +85,34 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       compressing = true;
     });
-    // final filseSize = await file!.length();
-    //
-    // final int width = (assetEntity!.width ~/ 2).toInt();
-    // int nearestEvenWidth = (width ~/ 2) * 2;
-    // final int height = (assetEntity.height ~/ 2).toInt();
-    // final int nearestEvenHeight = (height ~/ 2) * 2;
-    // // ignore: non_constant_identifier_names
-    // final int new_area = nearestEvenWidth * nearestEvenHeight;
-    // // ignore: non_constant_identifier_names
-    // int old_area = assetEntity.width * assetEntity.height;
-    // // ignore: non_constant_identifier_names
-    // final int video_duration = assetEntity.duration.toInt();
-    // // ignore: non_constant_identifier_names
-    // final double original_size_in_kBit = 8 * (filseSize) / 1000;
-    // // ignore: division_optimization
-    // final int kBitrate = (new_area / old_area) * original_size_in_kBit ~/ video_duration;
+    final filseSize = await file!.length();
+
+    final int width = (assetEntity!.width ~/ 2).toInt();
+    int nearestEvenWidth = (width ~/ 2) * 2;
+    final int height = (assetEntity.height ~/ 2).toInt();
+    final int nearestEvenHeight = (height ~/ 2) * 2;
+    // ignore: non_constant_identifier_names
+    final int new_area = nearestEvenWidth * nearestEvenHeight;
+    // ignore: non_constant_identifier_names
+    int old_area = assetEntity.width * assetEntity.height;
+    // ignore: non_constant_identifier_names
+    final int video_duration = assetEntity.duration.toInt();
+    // ignore: non_constant_identifier_names
+    final double original_size_in_kBit = 8 * (filseSize) / 1000;
+    // ignore: division_optimization
+    final int kBitrate = (new_area / old_area) * original_size_in_kBit ~/ video_duration;
 
 
     // Custom File size
-    const targetFileSizeInMB = 16;
-
-    final int width = (assetEntity!.size.width~/ 1.2 );
-    int nearestEvenWidth = (width ~/ 2) * 2;
-    final int height = (assetEntity.size.height~/ 1.2);
-    final int nearestEvenHeight = (height ~/ 2) * 2;
-    final int videoDuration = assetEntity.duration;
-    const num targetSizeInKBit = targetFileSizeInMB * 8000;
-    final int kBitrate = (targetSizeInKBit ~/ videoDuration);
+    // const targetFileSizeInMB = 16;
+    //
+    // final int width = (assetEntity!.size.width~/ 1.2 );
+    // int nearestEvenWidth = (width ~/ 2) * 2;
+    // final int height = (assetEntity.size.height~/ 1.2);
+    // final int nearestEvenHeight = (height ~/ 2) * 2;
+    // final int videoDuration = assetEntity.duration;
+    // const num targetSizeInKBit = targetFileSizeInMB * 8000;
+    // final int kBitrate = (targetSizeInKBit ~/ videoDuration);
 
 
 

@@ -148,13 +148,31 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             let progress = Progress(totalUnitCount: totalUnits)
      
             
+        
+        var outputformate = AVFileType.mp4
+        
+//        print("Ext: \(destination.pathExtension)")
+        
+        switch(destination.pathExtension){
+        case "mov":
+            outputformate = AVFileType.mov
+            break;
+        case "3gp":
+            outputformate = AVFileType.mobile3GPP
+            break;
+        case "m4v":
+            outputformate = AVFileType.m4v
+            break;
+        default:
+            outputformate = AVFileType.mp4
+        }
             
             // Setup video writer input
             let videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: getVideoWriterSettings(bitrate: newBitrate, width: newWidth, height: newHeight))
             videoWriterInput.expectsMediaDataInRealTime = true
             videoWriterInput.transform = videoTrack.preferredTransform
             
-        videoWriter = try! AVAssetWriter(outputURL: destination, fileType: AVFileType.mp4)
+        videoWriter = try! AVAssetWriter(outputURL: destination, fileType: outputformate)
             videoWriter!.add(videoWriterInput)
     
             
