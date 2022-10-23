@@ -87,9 +87,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     final filseSize = await file!.length();
 
-    final int width = (assetEntity!.width ~/ 2).toInt();
+    final int width = (assetEntity!.width ~/ 1).toInt();
     int nearestEvenWidth = (width ~/ 2) * 2;
-    final int height = (assetEntity.height ~/ 2).toInt();
+    final int height = (assetEntity.height ~/ 1).toInt();
     final int nearestEvenHeight = (height ~/ 2) * 2;
     // ignore: non_constant_identifier_names
     final int new_area = nearestEvenWidth * nearestEvenHeight;
@@ -120,6 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // FcVideoCompressorPlugin.setLogLevel(0);
 
     final int bitrate = kBitrate *1000;
+    // final int bitrate = (1991 * 1000)~/2;
     logger.d({
       "":"Start Compression",
       "Input":originalFile!.path,

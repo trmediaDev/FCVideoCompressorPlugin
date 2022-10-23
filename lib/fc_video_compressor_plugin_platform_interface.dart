@@ -71,6 +71,8 @@ abstract class FcVideoCompressorPluginPlatform extends PlatformInterface {
         required  int? width,
         required  int? height,
         required  bool? includeAudio,
+        required  int? audioSampleRate,
+        required  int? audioBitrate,
   required  int frameRate,
   }) {
     throw UnimplementedError('platformVersion() has not been implemented.');

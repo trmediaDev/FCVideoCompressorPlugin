@@ -70,6 +70,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             let duration = args!["duration"] as? Double
             let includeAudio = args!["includeAudio"] as? Bool
             let frameRate = args!["frameRate"] as? Int
+            let audioBitrate = args!["audioBitrate"] as? Int
+            let audioSampleRate = args!["audioSampleRate"] as? Int
             compressVideo(
                 path:path,
                 outputPath:outputPath,
@@ -82,6 +84,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                 frameRate:frameRate,
                 width: width,
                 height: height,
+                audioBitrate:audioBitrate,
+                audioSampleRate:audioSampleRate,
                 result:result)
         
         case "setLogLevel":
@@ -112,6 +116,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         frameRate: Int?,
         width: Int?,
         height: Int?,
+        audioBitrate: Int?,
+        audioSampleRate: Int?,
         result: @escaping FlutterResult
     ){
         
@@ -205,8 +211,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         let audioInputSettingsDict: [String:Any] = [
             AVFormatIDKey : kAudioFormatMPEG4AAC,
                                            AVNumberOfChannelsKey : 2,
-                                           AVSampleRateKey : 44100.0,
-                                           AVEncoderBitRateKey: 128000
+                                           AVSampleRateKey :  audioSampleRate ?? 44100,
+                                           AVEncoderBitRateKey: audioBitrate ?? 128000
         ]
         
        
@@ -220,7 +226,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             if(audioTrack != nil) {
                 let audioOutputSettingsDict: [String : Any] = [
                             AVFormatIDKey: kAudioFormatLinearPCM,
-                            AVSampleRateKey: 44100
+                            AVSampleRateKey :  audioSampleRate ?? 44100,
                 ]
                 audioReaderOutput = AVAssetReaderTrackOutput(track: audioTrack!, outputSettings: audioOutputSettingsDict)
                 audioReader = try! AVAssetReader(asset: videoAsset)

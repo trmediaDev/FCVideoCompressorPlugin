@@ -43,6 +43,8 @@ class MethodChannelFcVideoCompressorPlugin extends FcVideoCompressorPluginPlatfo
          int? height,
         bool? includeAudio,
         int frameRate = 30,
+           int? audioSampleRate,
+           int? audioBitrate,
       }) async {
     if (isCompressing) {
       throw StateError('''VideoCompress Error: 
@@ -68,6 +70,8 @@ class MethodChannelFcVideoCompressorPlugin extends FcVideoCompressorPluginPlatfo
       'duration': duration,
       'includeAudio': includeAudio,
       'frameRate': frameRate,
+      'audioBitrate': audioBitrate,
+      'audioSampleRate': audioSampleRate,
     });
 
     // debugPrint(jsonStr);

@@ -26,6 +26,8 @@ class FcVideoCompressorPlugin {
     int? height,
     bool? includeAudio,
     int frameRate = 30,
+    int? audioBitrate,
+    int? audioSampleRate,
   }) async {
     return FcVideoCompressorPluginPlatform.instance.compressVideo(
       inputPath: inputPath,
@@ -38,6 +40,8 @@ class FcVideoCompressorPlugin {
       height: height,
       includeAudio: includeAudio,
       frameRate: frameRate,
+      audioBitrate: audioBitrate,
+      audioSampleRate: audioSampleRate,
     );
   }
 

@@ -57,10 +57,11 @@ class MockFcVideoCompressorPluginPlatform
   }
 
   @override
-  Future<MediaInfo?> compressVideo({required String inputPath, required String outputPath, required int bitrate, required bool deleteOrigin, required int? startTime, required int? duration, required int? width, required int? height, required bool? includeAudio, required int frameRate}) {
+  Future<MediaInfo?> compressVideo({required String inputPath, required String outputPath, required int bitrate, required bool deleteOrigin, required int? startTime, required int? duration, required int? width, required int? height, required bool? includeAudio, required int? audioSampleRate, required int? audioBitrate, required int frameRate}) {
     // TODO: implement compressVideo
     throw UnimplementedError();
   }
+
 
 
 }
