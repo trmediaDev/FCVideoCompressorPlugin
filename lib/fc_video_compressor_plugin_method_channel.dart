@@ -91,6 +91,7 @@ class MethodChannelFcVideoCompressorPlugin extends FcVideoCompressorPluginPlatfo
   /// If there is no compression process, nothing will happen.
   @override
   Future<void> cancelCompression() async {
+    setProcessingStatus(false);
     await _invoke<void>('cancelCompression');
   }
 

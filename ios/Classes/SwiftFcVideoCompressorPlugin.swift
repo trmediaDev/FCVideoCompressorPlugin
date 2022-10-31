@@ -105,6 +105,32 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
 
     //
     
+    
+    private func getOutputFormate(destination: URL) -> AVFileType {
+        switch(destination.pathExtension){
+        case "mov":
+            return AVFileType.mov
+       
+        case "3gp":
+            return AVFileType.mobile3GPP
+        
+        case "m4v":
+            return AVFileType.m4v
+         
+        default:
+            return AVFileType.mp4
+        }
+    }
+    
+    private func updateProgresss(progress:Progress,frameCount:Int64){
+        progress.completedUnitCount  = frameCount
+  
+//                        let progress = ( frameCount/totalUnits)*100
+    let progressValue = progress.fractionCompleted * 100;
+        self.channel.invokeMethod("updateProgress", arguments: "\(String(describing:   progressValue))")
+    print("Progress: \(Int(progressValue))")
+        
+    }
     private func compressVideo(
         path: String,
         outputPath: String,
@@ -155,24 +181,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
      
             
         
-        var outputformate = AVFileType.mp4
+        var outputformate = getOutputFormate(destination:destination)
         
-//        print("Ext: \(destination.pathExtension)")
-        
-        switch(destination.pathExtension){
-        case "mov":
-            outputformate = AVFileType.mov
-            break;
-        case "3gp":
-            outputformate = AVFileType.mobile3GPP
-            break;
-        case "m4v":
-            outputformate = AVFileType.m4v
-            break;
-        default:
-            outputformate = AVFileType.mp4
-        }
-            
             // Setup video writer input
             let videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: getVideoWriterSettings(bitrate: newBitrate, width: newWidth, height: newHeight))
             videoWriterInput.expectsMediaDataInRealTime = true
@@ -196,7 +206,6 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                 print(error.localizedDescription)
 //                return result(error.localizedDescription)
                 
- 
                 
                 var json = self.getMediaInfoJson(path)
                 json["isCancel"]=true
@@ -239,41 +248,36 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             videoWriter?.startSession(atSourceTime: CMTime.zero)
             let processingQueue = DispatchQueue(label: "processingQueue1")
         
-
+     
             var isFirstBuffer = true
             videoWriterInput.requestMediaDataWhenReady(on: processingQueue, using: {() -> Void in
                 while videoWriterInput.isReadyForMoreMediaData {
 
-              
+                    print("videoReader status\( String(describing: self.videoReader?.status.rawValue))")
+                    print("videoWriter status\( String(describing: self.videoWriter?.status.rawValue))")
                     // Update progress based on number of processed frames
                     frameCount += 1
-        
-       
-                        progress.completedUnitCount  = Int64(frameCount)
-                  
-//                        let progress = ( frameCount/totalUnits)*100
-                    let progressValue = progress.fractionCompleted * 100;
-                        self.channel.invokeMethod("updateProgress", arguments: "\(String(describing:   progressValue))")
-                    print("Progress: \(Int(progressValue))")
-                        
-                    
-                   
-        
+                    self.updateProgresss(progress: progress,frameCount:frameCount)
+                
                     let sampleBuffer: CMSampleBuffer? = videoReaderOutput.copyNextSampleBuffer()
+                    
+                    print("is sampleBuffer == nil\(sampleBuffer == nil)")
 
                     if self.videoReader.status == .reading && sampleBuffer != nil {
                         videoWriterInput.append(sampleBuffer!)
                     } else {
                         videoWriterInput.markAsFinished()
-                        if self.videoReader!.status == .completed {
+                        if self.videoReader!.status == .completed  {
                             if(self.audioReader != nil){
                                 if(!(self.audioReader!.status == .reading) || !(self.audioReader!.status == .completed)){
                                     //start writing from audio reader
+                                
                                     self.audioReader?.startReading()
                                     self.videoWriter?.startSession(atSourceTime: CMTime.zero)
-                                    let processingQueue = DispatchQueue(label: "processingQueue2")
+                                    let processingQueue2 = DispatchQueue(label: "processingQueue2")
 
-                                    audioWriterInput.requestMediaDataWhenReady(on: processingQueue, using: {() -> Void in
+                                    audioWriterInput.requestMediaDataWhenReady(on: processingQueue2, using: {() -> Void in
+                                      
                                         while audioWriterInput.isReadyForMoreMediaData {
                                             let sampleBuffer: CMSampleBuffer? = audioReaderOutput?.copyNextSampleBuffer()
                                             if self.audioReader?.status == .reading && sampleBuffer != nil {
@@ -287,10 +291,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                                 audioWriterInput.markAsFinished()
 
                                                 self.videoWriter?.finishWriting(completionHandler: {() -> Void in
-//                                                   result(destination)
-//                                                    print(destination)
-                                            
-                                                    
+
                                                     var json = self.getMediaInfoJson(destination.absoluteString)
                                                     json["isCancel"]=false
                                                     let jsonString = Utility.keyValueToJson(json)
@@ -302,6 +303,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                     })
                                 }
                             }
+                            
                             
                             else if(self.videoWriter?.status == .cancelled){
                                 var json = self.getMediaInfoJson(destination.absoluteString)
@@ -322,6 +324,14 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                 })
                             }
                         }
+                        else{
+                            var json = self.getMediaInfoJson(destination.absoluteString)
+                            json["isCancel"]=true
+                            json["errorMessage"] = "Video is corrupted"
+                            let jsonString = Utility.keyValueToJson(json)
+                            return result(jsonString);
+                        }
+                       
                     }
                 }
             })
@@ -332,6 +342,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         videoWriter?.cancelWriting()
         videoReader?.cancelReading()
         audioReader?.cancelReading()
+    
         result(true)
     }
     
