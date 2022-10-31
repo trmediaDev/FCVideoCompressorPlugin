@@ -139,6 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
       height: nearestEvenHeight,
       width: nearestEvenWidth,
       bitrate: bitrate,
+      // duration: 4,
     );
     debugPrint("End Compression");
     debugPrint("${mediaInfo}");
