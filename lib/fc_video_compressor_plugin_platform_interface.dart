@@ -13,12 +13,15 @@ abstract class FcVideoCompressorPluginPlatform extends PlatformInterface {
 
   final compressProgress = ObservableBuilder<double>();
   final _channel = const MethodChannel(methodChannelName);
+  var _initiated = false;
 
   @protected
   void initProcessCallback() {
-    _channel.setMethodCallHandler(_progressCallback);
+    if (_initiated) {
+      _channel.setMethodCallHandler(_progressCallback);
+      _initiated = true;
+    }
   }
-
 
   MethodChannel get channel => _channel;
 

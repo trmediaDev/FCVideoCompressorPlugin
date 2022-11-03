@@ -1,10 +1,9 @@
-import 'package:collection/collection.dart';
+import 'dart:io';
+
 import 'package:fc_video_compressor_plugin/data/media_info.dart';
 import 'package:fc_video_compressor_plugin/fc_video_compressor_plugin.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:file_sizes/file_sizes.dart' as file_sizes;
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:open_file/open_file.dart' as open_file;
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -40,9 +39,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool compressing = false;
   MediaInfo? mediaInfo;
-  XFile? originalFile;
+  File? originalFile;
   int progress = 0;
-
 
   @override
   void initState() {
@@ -51,32 +49,31 @@ class _MyHomePageState extends State<MyHomePage> {
     FcVideoCompressorPlugin.initProcessCallback();
 
     FcVideoCompressorPlugin.compressProgress.subscribe((event) {
-      logger.d("Progress: ${event}");
+      logger.d("Progress: $event");
       progress = event.toInt();
-      setState(() {
-
-      });
+      setState(() {});
     });
   }
 
   Future<void> _compressVideo(BuildContext context) async {
-    final outputPath = "${(await path_provider.getTemporaryDirectory())
-        .path}/${DateTime
-        .now()
-        .microsecondsSinceEpoch}_compressed.mov";
     await AssetPicker.permissionCheck();
-    final List<AssetEntity>? result = await AssetPicker.pickAssets(context,pickerConfig: AssetPickerConfig(
-        requestType: RequestType.video,
-    ));
+    final List<AssetEntity>? result = await AssetPicker.pickAssets(context,
+        pickerConfig: AssetPickerConfig(
+          requestType: RequestType.video,
+        ));
 
-    final assetEntity = result?.firstOrNull;
-    final file = await (assetEntity?.file);
-
-
-    if (file != null) {
-      originalFile = XFile(file.path);
+    if (result != null) {
+      for (var element in result) {
+        await _compressASingleVideo(element);
+      }
     }
+  }
 
+  Future<void> _compressASingleVideo(AssetEntity assetEntity) async {
+    final outputPath =
+        "${(await path_provider.getTemporaryDirectory()).path}/${DateTime.now().microsecondsSinceEpoch}_compressed.mov";
+
+    originalFile = await assetEntity.file;
 
     if (originalFile == null) {
       return;
@@ -85,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       compressing = true;
     });
-    final filseSize = await file!.length();
+    final filseSize = await originalFile!.length();
 
     final int width = (assetEntity!.width ~/ 1).toInt();
     int nearestEvenWidth = (width ~/ 2) * 2;
@@ -115,21 +112,18 @@ class _MyHomePageState extends State<MyHomePage> {
     // final int kBitrate = (targetSizeInKBit ~/ videoDuration);
 
 
-
-
     // FcVideoCompressorPlugin.setLogLevel(0);
 
     final int bitrate = kBitrate *1000;
     // final int bitrate = (1991 * 1000)~/2;
     logger.d({
-      "":"Start Compression",
-      "Input":originalFile!.path,
-      "OutputPath":outputPath,
+      "": "Start Compression",
+      "Input": originalFile!.path,
+      "OutputPath": outputPath,
       "original size": "${assetEntity.size.width} X ${assetEntity.size.height}",
-      "target size": "${width} X ${height}",
-      "target bitrate":bitrate,
-      "duration":assetEntity.duration,
-
+      "target size": "$width X $height",
+      "target bitrate": bitrate,
+      "duration": assetEntity.duration,
     });
 
     final startedAt = DateTime.now();
@@ -142,17 +136,15 @@ class _MyHomePageState extends State<MyHomePage> {
       // duration: 4,
     );
     debugPrint("End Compression");
-    debugPrint("${mediaInfo}");
+    debugPrint("$mediaInfo");
     final endedAt = DateTime.now();
-    logger.d(
-        {
-          "start": startedAt.toString(),
-          "endedAt": endedAt.toString(),
-          "diff": endedAt.difference(startedAt).inSeconds,
-          "fileSize": mediaInfo?.filesize?.toFileSize(),
-          "size": "${mediaInfo?.width} * ${mediaInfo?.height}",
-        }
-    );
+    logger.d({
+      "start": startedAt.toString(),
+      "endedAt": endedAt.toString(),
+      "diff": endedAt.difference(startedAt).inSeconds,
+      "fileSize": mediaInfo?.filesize?.toFileSize(),
+      "size": "${mediaInfo?.width} * ${mediaInfo?.height}",
+    });
 
     if(mediaInfo?.isCancel ?? false){
       logger.e("Canceled: ${mediaInfo?.errorMessage}");

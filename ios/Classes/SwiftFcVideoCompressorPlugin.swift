@@ -21,7 +21,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
     var videoReader: AVAssetReader!
     var audioReader: AVAssetReader?
     
-    let progressQueue = DispatchQueue.init(label: "fc_video_compressor_pluginprogressQueue")
+    var progressQueue = DispatchQueue.init(label: "fc_video_compressor_pluginprogressQueue")
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "fc_video_compressor_plugin", binaryMessenger: registrar.messenger())
@@ -160,6 +160,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             json["isCancel"]=true
             json["errorMessage"] = "Video track not found"
             let jsonString = Utility.keyValueToJson(json)
+            self.clearLeftOver()
             return result(jsonString);
         }
         
@@ -218,6 +219,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             json["isCancel"]=true
             json["errorMessage"] = error.localizedDescription
             let jsonString = Utility.keyValueToJson(json)
+            self.clearLeftOver()
             return result(jsonString);
         }
         
@@ -309,6 +311,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                                 var json = self.getMediaInfoJson(destination.absoluteString)
                                                 json["isCancel"]=false
                                                 let jsonString = Utility.keyValueToJson(json)
+                                                self.clearLeftOver()
                                                 return result(jsonString);
                                             })
                                             
@@ -324,6 +327,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                             json["isCancel"]=true
                             json["errorMessage"] = "User canceled"
                             let jsonString = Utility.keyValueToJson(json)
+                            self.clearLeftOver()
                             return result(jsonString);
                         }
                         
@@ -334,6 +338,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                 var json = self.getMediaInfoJson(destination.absoluteString)
                                 json["isCancel"]=false
                                 let jsonString = Utility.keyValueToJson(json)
+                                self.clearLeftOver()
                                 return result(jsonString);
                             })
                         }
@@ -343,6 +348,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                         json["isCancel"]=true
                         json["errorMessage"] = "Video is corrupted"
                         let jsonString = Utility.keyValueToJson(json)
+                        self.clearLeftOver()
                         return result(jsonString);
                     }
                     
@@ -352,6 +358,12 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         
     }
     
+    private func clearLeftOver(){
+        videoWriter = nil
+        videoReader = nil
+        audioReader = nil
+        progressQueue = DispatchQueue.init(label: "fc_video_compressor_pluginprogressQueue")
+    }
     private func cancelCompression(_ result: FlutterResult) {
         videoWriter?.cancelWriting()
         videoReader?.cancelReading()
