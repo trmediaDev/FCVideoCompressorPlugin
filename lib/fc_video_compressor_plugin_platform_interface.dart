@@ -17,7 +17,7 @@ abstract class FcVideoCompressorPluginPlatform extends PlatformInterface {
 
   @protected
   void initProcessCallback() {
-    if (_initiated) {
+    if (!_initiated) {
       _channel.setMethodCallHandler(_progressCallback);
       _initiated = true;
     }
