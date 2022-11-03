@@ -368,7 +368,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         videoWriter?.cancelWriting()
         videoReader?.cancelReading()
         audioReader?.cancelReading()
-        
+        clearLeftOver()
         result(true)
     }
     

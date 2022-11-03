@@ -59,11 +59,6 @@ abstract class FcVideoCompressorPluginPlatform extends PlatformInterface {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }
-  //
-  // Future<String?> getPlatformVersion() {
-  //   throw UnimplementedError('platformVersion() has not been implemented.');
-  // }
-
   Future<MediaInfo?> compressVideo({
   required   String inputPath,
     required  String outputPath,
