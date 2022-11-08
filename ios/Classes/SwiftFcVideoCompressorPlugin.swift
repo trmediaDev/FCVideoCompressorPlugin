@@ -128,7 +128,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         //                        let progress = ( frameCount/totalUnits)*100
         let progressValue = progress.fractionCompleted * 100;
         self.channel.invokeMethod("updateProgress", arguments: "\(String(describing:   progressValue))")
-        print("Progress: \(Int(progressValue))")
+//        print("Progress: \(Int(progressValue))")
         
     }
     private func compressVideo(
@@ -258,7 +258,11 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         videoWriter?.startWriting()
         
         //start writing from video reader
-        videoReader?.startReading()
+        
+        if(self.videoReader?.status != .reading){
+            self.videoReader?.startReading()
+        }
+
         videoWriter?.startSession(atSourceTime: CMTime.zero)
         let processingQueue = DispatchQueue(label: "processingQueue1")
         
@@ -267,15 +271,15 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         videoWriterInput.requestMediaDataWhenReady(on: processingQueue, using: {() -> Void in
             while videoWriterInput.isReadyForMoreMediaData {
                 
-                print("videoReader status\( String(describing: self.videoReader?.status.rawValue))")
-                print("videoWriter status\( String(describing: self.videoWriter?.status.rawValue))")
+//                print("videoReader status\( String(describing: self.videoReader?.status.rawValue))")
+//                print("videoWriter status\( String(describing: self.videoWriter?.status.rawValue))")
                 // Update progress based on number of processed frames
                 frameCount += 1
                 self.updateProgresss(progress: progress,frameCount:frameCount)
                 
                 let sampleBuffer: CMSampleBuffer? = videoReaderOutput.copyNextSampleBuffer()
                 
-                print("is sampleBuffer == nil\(sampleBuffer == nil)")
+//                print("is sampleBuffer == nil\(sampleBuffer == nil)")
                 
                 if self.videoReader.status == .reading && sampleBuffer != nil {
                     videoWriterInput.append(sampleBuffer!)
@@ -287,7 +291,10 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                 //start writing from audio reader
                                 
                                 let endTime = CMTime.init(seconds: 3.0, preferredTimescale: 1000)
-                                self.audioReader?.startReading()
+                                if(self.audioReader?.status != .reading){
+                                    self.audioReader?.startReading()
+                                }
+                            
                                 self.videoWriter?.startSession(atSourceTime: CMTime.zero)
                                 //
                                 let processingQueue2 = DispatchQueue(label: "processingQueue2")
