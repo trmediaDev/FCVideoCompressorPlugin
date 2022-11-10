@@ -122,12 +122,18 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func updateProgresss(progress:Progress,frameCount:Int64){
-        progress.completedUnitCount  = frameCount
+    private func updateProgresss(videoProgressValue:Double,audioProgressValue:Double){
         
-        //                        let progress = ( frameCount/totalUnits)*100
-        let progressValue = progress.fractionCompleted * 100;
-        self.channel.invokeMethod("updateProgress", arguments: "\(String(describing:   progressValue))")
+  
+//
+//        let totalProgress = (videoProgressValue * 0.95) + (audioProgressValue * 0.05);
+//
+//        print([
+//            "videoProgressValue" :videoProgressValue,
+//            "audioProgressValue" :audioProgressValue,
+//            "totalProgress" :totalProgress,
+//        ])
+        self.channel.invokeMethod("updateProgress", arguments: "\(String(describing:   totalProgress))")
 //        print("Progress: \(Int(progressValue))")
         
     }
@@ -179,6 +185,8 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         // Progress
         let totalUnits = Int64(totalFrames)
         let progress = Progress(totalUnitCount: totalUnits)
+        let audioProgresss = Progress(totalUnitCount: Int64(durationInSeconds))
+    
         
         
         
@@ -275,7 +283,9 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
 //                print("videoWriter status\( String(describing: self.videoWriter?.status.rawValue))")
                 // Update progress based on number of processed frames
                 frameCount += 1
-                self.updateProgresss(progress: progress,frameCount:frameCount)
+                progress.completedUnitCount  = frameCount
+                let videoProgressValue = progress.fractionCompleted * 100;
+                self.updateProgresss(videoProgressValue: videoProgressValue,audioProgressValue:audioProgresss.fractionCompleted)
                 
                 let sampleBuffer: CMSampleBuffer? = videoReaderOutput.copyNextSampleBuffer()
                 
@@ -290,7 +300,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                             if(!(self.audioReader!.status == .reading) || !(self.audioReader!.status == .completed)){
                                 //start writing from audio reader
                                 
-                                let endTime = CMTime.init(seconds: 3.0, preferredTimescale: 1000)
+                            
                                 if(self.audioReader?.status != .reading){
                                     self.audioReader?.startReading()
                                 }
@@ -299,10 +309,27 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                 //
                                 let processingQueue2 = DispatchQueue(label: "processingQueue2")
                                 
+                                var durationCount:Double = 0;
                                 audioWriterInput.requestMediaDataWhenReady(on: processingQueue2, using: {() -> Void in
                                     
                                     while audioWriterInput.isReadyForMoreMediaData {
+                                        
                                         let sampleBuffer: CMSampleBuffer? = audioReaderOutput?.copyNextSampleBuffer()
+                                        if #available(iOS 13.0, *) {
+                                            if(sampleBuffer != nil){
+                                                let opt = sampleBuffer!.outputDuration
+                                                durationCount = (Double(opt.value)/Double(opt.timescale)) + durationCount
+                                                audioProgresss.completedUnitCount = Int64(durationCount)
+                                                let audioProgressValue =   audioProgresss.fractionCompleted * 100;
+//                                                print("audioProgressValue: \(audioProgressValue)")
+                                         
+                                                self.updateProgresss(videoProgressValue: videoProgressValue, audioProgressValue:audioProgressValue )
+                                            }
+                                      
+                                
+                                        } else {
+                                            self.updateProgresss(videoProgressValue: videoProgressValue, audioProgressValue:100 )
+                                        }
                                         if self.audioReader?.status == .reading && sampleBuffer != nil {
                                             if isFirstBuffer {
                                                 let dict = CMTimeCopyAsDictionary(CMTimeMake(value: 1024, timescale: 44100), allocator: kCFAllocatorDefault);
@@ -314,8 +341,10 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                             audioWriterInput.markAsFinished()
                                             
                                             self.videoWriter?.finishWriting(completionHandler: {() -> Void in
-                                                
+                                    
+                                                self.updateProgresss(videoProgressValue: 100, audioProgressValue: 100 )
                                                 var json = self.getMediaInfoJson(destination.absoluteString)
+                                                
                                                 json["isCancel"]=false
                                                 let jsonString = Utility.keyValueToJson(json)
                                                 self.clearLeftOver()
@@ -342,6 +371,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                             self.videoWriter?.finishWriting(completionHandler: {() -> Void in
                                 //                                    result(destination)
                                 //                                    print(destination)
+                                self.updateProgresss(videoProgressValue: 100, audioProgressValue: 100 )
                                 var json = self.getMediaInfoJson(destination.absoluteString)
                                 json["isCancel"]=false
                                 let jsonString = Utility.keyValueToJson(json)

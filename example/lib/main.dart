@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
     FcVideoCompressorPlugin.initProcessCallback();
 
     FcVideoCompressorPlugin.compressProgress.subscribe((event) {
-      logger.d("Progress: $event");
+      // logger.d("Progress: $event");
       progress = event.toInt();
       setState(() {});
     });
@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
       height: nearestEvenHeight,
       width: nearestEvenWidth,
       bitrate: bitrate,
-      duration: 4,
+      // duration: 4,
     );
     debugPrint("End Compression");
     debugPrint("$mediaInfo");
