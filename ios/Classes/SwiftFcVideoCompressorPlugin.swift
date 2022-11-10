@@ -126,7 +126,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         
   
 //
-//        let totalProgress = (videoProgressValue * 0.95) + (audioProgressValue * 0.05);
+        let totalProgress = (videoProgressValue * 0.95) + (audioProgressValue * 0.05);
 //
 //        print([
 //            "videoProgressValue" :videoProgressValue,
