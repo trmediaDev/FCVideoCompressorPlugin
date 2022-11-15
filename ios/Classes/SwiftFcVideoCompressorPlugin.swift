@@ -118,7 +118,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
             return AVFileType.m4v
             
         default:
-            return AVFileType.mp4
+            return AVFileType.mov
         }
     }
     
@@ -153,6 +153,7 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         result: @escaping FlutterResult
     ){
         
+    
         
         let soruce =     Utility.getPathUrl(path)
         let destination = Utility.getPathUrl(outputPath)
@@ -411,17 +412,20 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
     
     
     
-    private func getVideoWriterSettings(bitrate: Int, width: Int, height: Int) -> [String : AnyObject] {
+    private func getVideoWriterSettings(bitrate: Int, width: Int, height: Int) -> [String : Any] {
         
-        let videoWriterCompressionSettings = [
-            AVVideoAverageBitRateKey : bitrate
-        ]
+    
         
-        let videoWriterSettings: [String : AnyObject] = [
-            AVVideoCodecKey : AVVideoCodecType.h264 as AnyObject,
-            AVVideoCompressionPropertiesKey : videoWriterCompressionSettings as AnyObject,
-            AVVideoWidthKey : width as AnyObject,
-            AVVideoHeightKey : height as AnyObject
+        let videoWriterSettings: [String : Any] = [
+            AVVideoCodecKey : AVVideoCodecType.h264 ,
+            AVVideoCompressionPropertiesKey : [
+                AVVideoAverageBitRateKey : bitrate,
+
+//                AVVideoProfileLevelKey: AVVideoProfileLevelH264High41,
+//                AVVideoH264EntropyModeKey: AVVideoH264EntropyModeCABAC,
+            ] ,
+            AVVideoWidthKey : width ,
+            AVVideoHeightKey : height
         ]
         
         return videoWriterSettings

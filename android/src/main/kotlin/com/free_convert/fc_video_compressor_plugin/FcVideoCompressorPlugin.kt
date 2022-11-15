@@ -1,34 +1,29 @@
 package com.free_convert.fc_video_compressor_plugin
 
-import androidx.annotation.NonNull
-
-import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
-
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.otaliastudios.transcoder.Transcoder
 import com.otaliastudios.transcoder.TranscoderListener
+import com.otaliastudios.transcoder.common.*
+import com.otaliastudios.transcoder.internal.utils.Logger
+import com.otaliastudios.transcoder.resize.ExactResizer
 import com.otaliastudios.transcoder.source.TrimDataSource
 import com.otaliastudios.transcoder.source.UriDataSource
 import com.otaliastudios.transcoder.strategy.DefaultAudioStrategy
 import com.otaliastudios.transcoder.strategy.DefaultVideoStrategy
 import com.otaliastudios.transcoder.strategy.RemoveTrackStrategy
 import com.otaliastudios.transcoder.strategy.TrackStrategy
-import com.otaliastudios.transcoder.common.*
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
-import com.otaliastudios.transcoder.internal.utils.Logger
-import com.otaliastudios.transcoder.resize.ExactResizer
-
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Future
 
@@ -97,17 +92,28 @@ class FcVideoCompressorPlugin : MethodCallHandler, FlutterPlugin {
                 val bitrate = call.argument<Int>("bitrate")!!
                 val height = call.argument<Int?>("height")
                 val width = call.argument<Int?>("width")
-                val deleteOrigin = call.argument<Boolean>("deleteOrigin")?: false
+                val deleteOrigin = call.argument<Boolean>("deleteOrigin") ?: false
                 val startTime = call.argument<Int?>("startTime")
                 val duration = call.argument<Int?>("duration")
+                var audioBitrate = call.argument<Int?>("audioBitrate")?.toLong()
+                var audioSampleRate = call.argument<Int?>("audioSampleRate")
                 val includeAudio = call.argument<Boolean>("includeAudio") ?: true
                 val frameRate =
-                    if (call.argument<Int>("frameRate") == null) 30 else call.argument<Int>("frameRate")
+                        if (call.argument<Int>("frameRate") == null) 30 else call.argument<Int>("frameRate")
 
 //                val tempDir: String = context.getExternalFilesDir("video_compress")!!.absolutePath
 //                val out = SimpleDateFormat("yyyy-MM-dd hh-mm-ss").format(Date())
 //                val destPath: String =
 //                    tempDir + File.separator + "VID_" + out + path.hashCode() + ".mp4"
+
+                if (audioSampleRate == null) {
+                    audioSampleRate = DefaultAudioStrategy.SAMPLE_RATE_AS_INPUT
+                }
+
+
+                if (audioBitrate == null) {
+                    audioBitrate = 128000
+                }
 
                 val videoTrackStrategyBuilder = DefaultVideoStrategy.Builder();
 
@@ -116,20 +122,20 @@ class FcVideoCompressorPlugin : MethodCallHandler, FlutterPlugin {
                 }
 
                 var videoTrackStrategy: TrackStrategy =
-                    videoTrackStrategyBuilder
-                        .keyFrameInterval(3f)
+                        videoTrackStrategyBuilder
+                                .keyFrameInterval(3f)
                         .bitRate(bitrate.toLong())
                         .build()
 
 
-
                 val audioTrackStrategy: TrackStrategy = if (includeAudio) {
-                    val sampleRate = DefaultAudioStrategy.SAMPLE_RATE_AS_INPUT
+//                    val sampleRate = audioSampleRate ?? DefaultAudioStrategy.SAMPLE_RATE_AS_INPUT
                     val channels = DefaultAudioStrategy.CHANNELS_AS_INPUT
 
                     DefaultAudioStrategy.builder()
-                        .channels(channels)
-                        .sampleRate(sampleRate)
+                            .channels(channels)
+                            .sampleRate(audioSampleRate)
+                            .bitRate(audioBitrate)
                         .build()
                 } else {
                     RemoveTrackStrategy()
@@ -169,18 +175,18 @@ class FcVideoCompressorPlugin : MethodCallHandler, FlutterPlugin {
                         }
 
                         override fun onTranscodeCanceled() {
-                            val json  = JSONObject()
+                            val json = JSONObject()
                             json.put("isCancel", true)
-                            json.put("errorMessage","User canceled")
+                            json.put("errorMessage", "User canceled")
                             Log.d(TAG, "onTranscodeCanceled: ")
                             result.success(json.toString())
-                          
-             
+
+
                         }
 
                         override fun onTranscodeFailed(exception: Throwable) {
-                            val json  = JSONObject()
-                            json.put("errorMessage",exception.message)
+                            val json = JSONObject()
+                            json.put("errorMessage", exception.message)
                             json.put("isCancel", true)
                             Log.d(TAG, "onTranscodeFailed: ")
                             result.success(json.toString())

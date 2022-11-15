@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:fc_video_compressor_plugin/data/media_info.dart';
 import 'package:fc_video_compressor_plugin/fc_video_compressor_plugin.dart';
+import 'package:fc_video_compressor_plugin_example/media_info_page.dart';
 import 'package:file_sizes/file_sizes.dart' as file_sizes;
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -10,6 +11,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 final logger = Logger();
+
 void main() {
   runApp(MyApp());
 }
@@ -84,37 +86,36 @@ class _MyHomePageState extends State<MyHomePage> {
     });
     final filseSize = await originalFile!.length();
 
-    final int width = (assetEntity!.width ~/ 1).toInt();
-    int nearestEvenWidth = (width ~/ 2) * 2;
-    final int height = (assetEntity.height ~/ 1).toInt();
-    final int nearestEvenHeight = (height ~/ 2) * 2;
-    // ignore: non_constant_identifier_names
-    final int new_area = nearestEvenWidth * nearestEvenHeight;
-    // ignore: non_constant_identifier_names
-    int old_area = assetEntity.width * assetEntity.height;
-    // ignore: non_constant_identifier_names
-    final int video_duration = assetEntity.duration.toInt();
-    // ignore: non_constant_identifier_names
-    final double original_size_in_kBit = 8 * (filseSize) / 1000;
-    // ignore: division_optimization
-    final int kBitrate = (new_area / old_area) * original_size_in_kBit ~/ video_duration;
-
+    // final int width = (assetEntity!.width ~/ 1).toInt();
+    // int nearestEvenWidth = (width ~/ 2) * 2;
+    // final int height = (assetEntity.height ~/ 1).toInt();
+    // final int nearestEvenHeight = (height ~/ 2) * 2;
+    // // ignore: non_constant_identifier_names
+    // final int new_area = nearestEvenWidth * nearestEvenHeight;
+    // // ignore: non_constant_identifier_names
+    // int old_area = assetEntity.width * assetEntity.height;
+    // // ignore: non_constant_identifier_names
+    // final int video_duration = assetEntity.duration.toInt();
+    // // ignore: non_constant_identifier_names
+    // final double original_size_in_kBit = 8 * (filseSize) / 1000;
+    // // ignore: division_optimization
+    // final int kBitrate = (new_area / old_area) * original_size_in_kBit ~/ video_duration;
 
     // Custom File size
-    // const targetFileSizeInMB = 16;
-    //
-    // final int width = (assetEntity!.size.width~/ 1.2 );
-    // int nearestEvenWidth = (width ~/ 2) * 2;
-    // final int height = (assetEntity.size.height~/ 1.2);
-    // final int nearestEvenHeight = (height ~/ 2) * 2;
-    // final int videoDuration = assetEntity.duration;
-    // const num targetSizeInKBit = targetFileSizeInMB * 8000;
-    // final int kBitrate = (targetSizeInKBit ~/ videoDuration);
+    const targetFileSizeInMB = 20;
 
+    final int width = (assetEntity.size.width ~/ 1);
+    int nearestEvenWidth = (width ~/ 2) * 2;
+    final int height = (assetEntity.size.height ~/ 1);
+    final int nearestEvenHeight = (height ~/ 2) * 2;
+    final int videoDuration = assetEntity.duration;
+    const num targetSizeInKBit = targetFileSizeInMB * 8000;
+    const audioBitrate = 128000;
+    final int kBitrate = (targetSizeInKBit ~/ videoDuration);
 
     // FcVideoCompressorPlugin.setLogLevel(0);
 
-    final int bitrate = kBitrate *1000;
+    final int bitrate = kBitrate * 1000 - audioBitrate;
     // final int bitrate = (1991 * 1000)~/2;
     logger.d({
       "": "Start Compression",
@@ -128,13 +129,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final startedAt = DateTime.now();
     mediaInfo = await FcVideoCompressorPlugin.compressVideo(
-      inputPath: originalFile!.path,
-      outputPath: outputPath,
-      height: nearestEvenHeight,
-      width: nearestEvenWidth,
-      bitrate: bitrate,
-      // duration: 4,
-    );
+        inputPath: originalFile!.path,
+        outputPath: outputPath,
+        height: nearestEvenHeight,
+        width: nearestEvenWidth,
+        bitrate: bitrate,
+        audioBitrate: 64000
+        // duration: 4,
+        );
     debugPrint("End Compression");
     debugPrint("$mediaInfo");
     final endedAt = DateTime.now();
@@ -146,13 +148,14 @@ class _MyHomePageState extends State<MyHomePage> {
       "size": "${mediaInfo?.width} * ${mediaInfo?.height}",
     });
 
-    if(mediaInfo?.isCancel ?? false){
+    if (mediaInfo?.isCancel ?? false) {
       logger.e("Canceled: ${mediaInfo?.errorMessage}");
     }
     setState(() {
       compressing = false;
     });
   }
+
   num _reduceTargetFileSize(num targetFileSize) {
     if (targetFileSize < 10) {
       return targetFileSize - (targetFileSize * 20) / 100;
@@ -162,6 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return targetFileSize - (targetFileSize * 12) / 100;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,9 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     }),
               ],
             ),
-
-            Text("Progress: $progress %",style: Theme.of(context).textTheme.headline6,),
-
+            Text(
+              "Progress: $progress %",
+              style: Theme.of(context).textTheme.headline6,
+            ),
             Column(
               children: [
                 const Text("Compressed: "),
@@ -194,9 +199,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text("${mediaInfo?.filesize?.toFileSize()}"),
               ],
             ),
-
             if (compressing) const Text("Compressing ..."),
-
             if (compressing)
               InkWell(
                   child: const Icon(
@@ -208,12 +211,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     compressing = FcVideoCompressorPlugin.isCompressing;
                     setState(() {});
                   }),
-            if(mediaInfo?.path != null)
+            if (mediaInfo?.path != null)
               ElevatedButton(
                 onPressed: () {
                   open_file.OpenFile.open(mediaInfo?.path!);
                 },
                 child: const Text('Open File'),
+              ),
+            if (mediaInfo?.path != null)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => MediaInfoPage(filePath: mediaInfo!.path!)));
+                },
+                child: const Text('Media Info'),
               ),
           ],
         ),
@@ -227,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-extension IntExt on int{
+extension IntExt on int {
   String toFileSize() {
     return file_sizes.FileSize.getSize(this);
   }
