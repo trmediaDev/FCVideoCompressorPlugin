@@ -130,13 +130,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final startedAt = DateTime.now();
     mediaInfo = await FcVideoCompressorPlugin.compressVideo(
         inputPath: originalFile!.path,
-        outputPath: outputPath,
-        height: nearestEvenHeight,
-        width: nearestEvenWidth,
-        bitrate: bitrate,
-        audioBitrate: 64000
-        // duration: 4,
-        );
+      outputPath: outputPath,
+      height: nearestEvenHeight,
+      width: nearestEvenWidth,
+      bitrate: bitrate,
+      audioBitrate: 64000,
+      duration: 3,
+    );
     debugPrint("End Compression");
     debugPrint("$mediaInfo");
     final endedAt = DateTime.now();

@@ -9,7 +9,7 @@ import com.otaliastudios.transcoder.TranscoderListener
 import com.otaliastudios.transcoder.common.*
 import com.otaliastudios.transcoder.internal.utils.Logger
 import com.otaliastudios.transcoder.resize.ExactResizer
-import com.otaliastudios.transcoder.source.TrimDataSource
+import com.otaliastudios.transcoder.source.ClipDataSource
 import com.otaliastudios.transcoder.source.UriDataSource
 import com.otaliastudios.transcoder.strategy.DefaultAudioStrategy
 import com.otaliastudios.transcoder.strategy.DefaultVideoStrategy
@@ -20,11 +20,9 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
 import java.io.File
-import java.util.*
 import java.util.concurrent.Future
 
 /**
@@ -94,7 +92,7 @@ class FcVideoCompressorPlugin : MethodCallHandler, FlutterPlugin {
                 val width = call.argument<Int?>("width")
                 val deleteOrigin = call.argument<Boolean>("deleteOrigin") ?: false
                 val startTime = call.argument<Int?>("startTime")
-                val duration = call.argument<Int?>("duration")
+                val endTime = call.argument<Int?>("duration")
                 var audioBitrate = call.argument<Int?>("audioBitrate")?.toLong()
                 var audioSampleRate = call.argument<Int?>("audioSampleRate")
                 val includeAudio = call.argument<Boolean>("includeAudio") ?: true
@@ -136,17 +134,19 @@ class FcVideoCompressorPlugin : MethodCallHandler, FlutterPlugin {
                             .channels(channels)
                             .sampleRate(audioSampleRate)
                             .bitRate(audioBitrate)
-                        .build()
+                            .build()
                 } else {
                     RemoveTrackStrategy()
                 }
 
-                val dataSource = if (startTime != null || duration != null) {
+
+                val dataSource = if (startTime != null || endTime != null) {
+//                    Log.d(TAG, "onMethodCall: startTime: ${startTime} endTime: $endTime")
                     val source = UriDataSource(context, Uri.parse(path))
-                    TrimDataSource(
-                        source,
-                        (1000 * 1000 * (startTime ?: 0)).toLong(),
-                        (1000 * 1000 * (duration ?: 0)).toLong()
+                    ClipDataSource(
+                            source,
+                            (1000 * 1000 * (startTime ?: 0)).toLong(),
+                            (1000 * 1000 * (endTime ?: 0)).toLong()
                     )
                 } else {
                     UriDataSource(context, Uri.parse(path))
