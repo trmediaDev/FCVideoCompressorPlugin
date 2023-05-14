@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
       width: nearestEvenWidth,
       bitrate: bitrate,
       audioBitrate: 64000,
-      duration: 3,
+      // duration: 3,
     );
     debugPrint("End Compression");
     debugPrint("$mediaInfo");

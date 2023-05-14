@@ -2,7 +2,7 @@ group 'com.free_convert.fc_video_compressor_plugin'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.6.10'
+    ext.kotlin_version = '1.8.20'
     repositories {
         google()
         mavenCentral()
@@ -46,6 +46,6 @@ android {
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-        implementation 'com.otaliastudios:transcoder:0.10.4'
+        implementation 'com.otaliastudios:transcoder:0.10.5'
     }
 }

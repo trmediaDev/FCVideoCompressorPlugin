@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 import AVFoundation
-
+import os
 
 //some of the code coppied form
 //https://github.com/AbedElazizShe/LightCompressor_iOS
@@ -10,6 +10,8 @@ import AVFoundation
 
 
 public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
+    
+
     
     init(channel: FlutterMethodChannel) {
         self.channel = channel
@@ -153,247 +155,259 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         result: @escaping FlutterResult
     ){
         
-    
-        
         let soruce =     Utility.getPathUrl(path)
         let destination = Utility.getPathUrl(outputPath)
         let videoAsset = AVURLAsset(url: soruce)
         var frameCount:Int64 = 0
-        guard let videoTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first else {
-            
-            
-            
-            var json = self.getMediaInfoJson(path)
-            json["isCancel"]=true
-            json["errorMessage"] = "Video track not found"
-            let jsonString = Utility.keyValueToJson(json)
-            self.clearLeftOver()
-            return result(jsonString);
-        }
-        
-        let newBitrate:Int = bitrate
-        
-        
-        let videoSize = videoTrack.naturalSize
-        let newWidth:Int = width ?? Int( videoSize.width);
-        let newHeight:Int = height ?? Int(videoSize.height);
-        
-        // Total Frames
-        let durationInSeconds = duration ?? videoAsset.duration.seconds
-        let nominalFrameRate = videoTrack.nominalFrameRate
-        let totalFrames = ceil(durationInSeconds * Double(nominalFrameRate))
-        
-        // Progress
-        let totalUnits = Int64(totalFrames)
-        let progress = Progress(totalUnitCount: totalUnits)
-        let audioProgresss = Progress(totalUnitCount: Int64(durationInSeconds))
-    
-        
-        
-        
-        let outputformate = getOutputFormate(destination:destination)
-        
-        // Setup video writer input
-        let videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: getVideoWriterSettings(bitrate: newBitrate, width: newWidth, height: newHeight))
-        videoWriterInput.expectsMediaDataInRealTime = true
-        videoWriterInput.transform = videoTrack.preferredTransform
-        
-        let timeRange = duration == nil ? nil: CMTimeRange(start: CMTime.zero, end: CMTime.init(seconds: duration!, preferredTimescale: 1));
-        
-        videoWriter = try! AVAssetWriter(outputURL: destination, fileType: outputformate)
-        videoWriter!.add(videoWriterInput)
-        
-        
-        // Setup video reader output
-        let videoReaderSettings:[String : AnyObject] = [
-            kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) as AnyObject
-        ]
-        let videoReaderOutput = AVAssetReaderTrackOutput(track: videoTrack, outputSettings: videoReaderSettings)
-        
-        
         do{
-            videoReader = try AVAssetReader(asset: videoAsset)
             
-            if(timeRange != nil){
-                videoReader.timeRange = timeRange!
+     
+            guard let videoTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first else {
+                
+                
+                
+                var json = self.getMediaInfoJson(path)
+                json["isCancel"]=true
+                json["errorMessage"] = "Video track not found"
+                let jsonString = Utility.keyValueToJson(json)
+                self.clearLeftOver()
+                return result(jsonString);
             }
-           
-        }
-        catch {
-            print(error.localizedDescription)
-            //                return result(error.localizedDescription)
+            
+            let newBitrate:Int = bitrate
             
             
-            var json = self.getMediaInfoJson(path)
-            json["isCancel"]=true
-            json["errorMessage"] = error.localizedDescription
-            let jsonString = Utility.keyValueToJson(json)
-            self.clearLeftOver()
-            return result(jsonString);
-        }
+            let videoSize = videoTrack.naturalSize
+            let newWidth:Int = width ?? Int( videoSize.width);
+            let newHeight:Int = height ?? Int(videoSize.height);
+            
+            // Total Frames
+            let durationInSeconds = duration ?? videoAsset.duration.seconds
+            let nominalFrameRate = videoTrack.nominalFrameRate
+            let totalFrames = ceil(durationInSeconds * Double(nominalFrameRate))
+            
+            // Progress
+            let totalUnits = Int64(totalFrames)
+            let progress = Progress(totalUnitCount: totalUnits)
+            let audioProgresss = Progress(totalUnitCount: Int64(durationInSeconds))
         
-        videoReader?.add(videoReaderOutput)
-        //setup audio writer
-        
-        let audioInputSettingsDict: [String:Any] = [
-            AVFormatIDKey : kAudioFormatMPEG4AAC,
-            AVNumberOfChannelsKey : 2,
-            AVSampleRateKey :  audioSampleRate ?? 44100,
-            AVEncoderBitRateKey: audioBitrate ?? 128000
-        ]
-        
-        
-        let audioWriterInput = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: audioInputSettingsDict)
-        audioWriterInput.expectsMediaDataInRealTime = false
-        videoWriter?.add(audioWriterInput)
-        //setup audio reader
-        let audioTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
-        
-        var audioReaderOutput: AVAssetReaderTrackOutput?
-        if(audioTrack != nil) {
-            let audioOutputSettingsDict: [String : Any] = [
-                AVFormatIDKey: kAudioFormatLinearPCM,
-                AVSampleRateKey :  audioSampleRate ?? 44100,
+            
+            
+            
+            let outputformate = getOutputFormate(destination:destination)
+            
+            // Setup video writer input
+            let videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: getVideoWriterSettings(bitrate: newBitrate, width: newWidth, height: newHeight))
+            videoWriterInput.expectsMediaDataInRealTime = true
+            videoWriterInput.transform = videoTrack.preferredTransform
+            
+            let timeRange = duration == nil ? nil: CMTimeRange(start: CMTime.zero, end: CMTime.init(seconds: duration!, preferredTimescale: 1));
+            
+            videoWriter = try! AVAssetWriter(outputURL: destination, fileType: outputformate)
+            videoWriter!.add(videoWriterInput)
+            
+            
+            // Setup video reader output
+            let videoReaderSettings:[String : AnyObject] = [
+                kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) as AnyObject
             ]
-            audioReaderOutput = AVAssetReaderTrackOutput(track: audioTrack!, outputSettings: audioOutputSettingsDict)
-            audioReader = try! AVAssetReader(asset: videoAsset)
+            let videoReaderOutput = AVAssetReaderTrackOutput(track: videoTrack, outputSettings: videoReaderSettings)
             
-            if(timeRange != nil){
-                audioReader?.timeRange = timeRange!
+            
+            do{
+                videoReader = try AVAssetReader(asset: videoAsset)
+                
+                if(timeRange != nil){
+                    videoReader.timeRange = timeRange!
+                }
+               
             }
-          
-            audioReader?.add(audioReaderOutput!)
-        }
-        videoWriter?.startWriting()
-        
-        //start writing from video reader
-        
-        if(self.videoReader?.status != .reading){
-            self.videoReader?.startReading()
-        }
+            catch {
+                print(error.localizedDescription)
+                //                return result(error.localizedDescription)
+                
+                
+                var json = self.getMediaInfoJson(path)
+                json["isCancel"]=true
+                json["errorMessage"] = error.localizedDescription
+                let jsonString = Utility.keyValueToJson(json)
+                self.clearLeftOver()
+                return result(jsonString);
+            }
+            
+            videoReader?.add(videoReaderOutput)
+            //setup audio writer
+            
+            let audioInputSettingsDict: [String:Any] = [
+                AVFormatIDKey : kAudioFormatMPEG4AAC,
+                AVNumberOfChannelsKey : 2,
+                AVSampleRateKey :  audioSampleRate ?? 44100,
+                AVEncoderBitRateKey: audioBitrate ?? 128000
+            ]
+            
+            
+            let audioWriterInput = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: audioInputSettingsDict)
+            audioWriterInput.expectsMediaDataInRealTime = false
+            videoWriter?.add(audioWriterInput)
+            //setup audio reader
+            let audioTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
+            
+            var audioReaderOutput: AVAssetReaderTrackOutput?
+            if(audioTrack != nil) {
+                let audioOutputSettingsDict: [String : Any] = [
+                    AVFormatIDKey: kAudioFormatLinearPCM,
+                    AVSampleRateKey :  audioSampleRate ?? 44100,
+                ]
+                audioReaderOutput = AVAssetReaderTrackOutput(track: audioTrack!, outputSettings: audioOutputSettingsDict)
+                audioReader = try! AVAssetReader(asset: videoAsset)
+                
+                if(timeRange != nil){
+                    audioReader?.timeRange = timeRange!
+                }
+              
+                audioReader?.add(audioReaderOutput!)
+            }
+            videoWriter?.startWriting()
+            
+            //start writing from video reader
+            
+            if(self.videoReader?.status != .reading){
+                self.videoReader?.startReading()
+            }
 
-        videoWriter?.startSession(atSourceTime: CMTime.zero)
-        let processingQueue = DispatchQueue(label: "processingQueue1")
-        
-        
-        var isFirstBuffer = true
-        videoWriterInput.requestMediaDataWhenReady(on: processingQueue, using: {() -> Void in
-            while videoWriterInput.isReadyForMoreMediaData {
-                
-//                print("videoReader status\( String(describing: self.videoReader?.status.rawValue))")
-//                print("videoWriter status\( String(describing: self.videoWriter?.status.rawValue))")
-                // Update progress based on number of processed frames
-                frameCount += 1
-                progress.completedUnitCount  = frameCount
-                let videoProgressValue = progress.fractionCompleted * 100;
-                self.updateProgresss(videoProgressValue: videoProgressValue,audioProgressValue:audioProgresss.fractionCompleted)
-                
-                let sampleBuffer: CMSampleBuffer? = videoReaderOutput.copyNextSampleBuffer()
-                
-//                print("is sampleBuffer == nil\(sampleBuffer == nil)")
-                
-                if self.videoReader.status == .reading && sampleBuffer != nil {
-                    videoWriterInput.append(sampleBuffer!)
-                } else {
-                    videoWriterInput.markAsFinished()
-                    if self.videoReader!.status == .completed  {
-                        if(self.audioReader != nil){
-                            if(!(self.audioReader!.status == .reading) || !(self.audioReader!.status == .completed)){
-                                //start writing from audio reader
-                                
-                            
-                                if(self.audioReader?.status != .reading){
-                                    self.audioReader?.startReading()
-                                }
-                            
-                                self.videoWriter?.startSession(atSourceTime: CMTime.zero)
-                                //
-                                let processingQueue2 = DispatchQueue(label: "processingQueue2")
-                                
-                                var durationCount:Double = 0;
-                                audioWriterInput.requestMediaDataWhenReady(on: processingQueue2, using: {() -> Void in
+            videoWriter?.startSession(atSourceTime: CMTime.zero)
+            let processingQueue = DispatchQueue(label: "processingQueue1")
+            
+            
+            var isFirstBuffer = true
+            videoWriterInput.requestMediaDataWhenReady(on: processingQueue, using: {() -> Void in
+                while videoWriterInput.isReadyForMoreMediaData {
+                    
+    //                print("videoReader status\( String(describing: self.videoReader?.status.rawValue))")
+    //                print("videoWriter status\( String(describing: self.videoWriter?.status.rawValue))")
+                    // Update progress based on number of processed frames
+                    frameCount += 1
+                    progress.completedUnitCount  = frameCount
+                    let videoProgressValue = progress.fractionCompleted * 100;
+                    self.updateProgresss(videoProgressValue: videoProgressValue,audioProgressValue:audioProgresss.fractionCompleted)
+                    
+                    let sampleBuffer: CMSampleBuffer? = videoReaderOutput.copyNextSampleBuffer()
+                    
+    //                print("is sampleBuffer == nil\(sampleBuffer == nil)")
+                    
+                    if self.videoReader.status == .reading && sampleBuffer != nil {
+                        videoWriterInput.append(sampleBuffer!)
+                    } else {
+                        videoWriterInput.markAsFinished()
+                        if self.videoReader!.status == .completed  {
+                            if(self.audioReader != nil){
+                                if(!(self.audioReader!.status == .reading) || !(self.audioReader!.status == .completed)){
+                                    //start writing from audio reader
                                     
-                                    while audioWriterInput.isReadyForMoreMediaData {
-                                        
-                                        let sampleBuffer: CMSampleBuffer? = audioReaderOutput?.copyNextSampleBuffer()
-                                        if #available(iOS 13.0, *) {
-                                            if(sampleBuffer != nil){
-                                                let opt = sampleBuffer!.outputDuration
-                                                durationCount = (Double(opt.value)/Double(opt.timescale)) + durationCount
-                                                audioProgresss.completedUnitCount = Int64(durationCount)
-                                                let audioProgressValue =   audioProgresss.fractionCompleted * 100;
-//                                                print("audioProgressValue: \(audioProgressValue)")
-                                         
-                                                self.updateProgresss(videoProgressValue: videoProgressValue, audioProgressValue:audioProgressValue )
-                                            }
-                                      
                                 
-                                        } else {
-                                            self.updateProgresss(videoProgressValue: videoProgressValue, audioProgressValue:100 )
-                                        }
-                                        if self.audioReader?.status == .reading && sampleBuffer != nil {
-                                            if isFirstBuffer {
-                                                let dict = CMTimeCopyAsDictionary(CMTimeMake(value: 1024, timescale: 44100), allocator: kCFAllocatorDefault);
-                                                CMSetAttachment(sampleBuffer as CMAttachmentBearer, key: kCMSampleBufferAttachmentKey_TrimDurationAtStart, value: dict, attachmentMode: kCMAttachmentMode_ShouldNotPropagate);
-                                                isFirstBuffer = false
-                                            }
-                                            audioWriterInput.append(sampleBuffer!)
-                                        } else {
-                                            audioWriterInput.markAsFinished()
-                                            
-                                            self.videoWriter?.finishWriting(completionHandler: {() -> Void in
-                                    
-                                                self.updateProgresss(videoProgressValue: 100, audioProgressValue: 100 )
-                                                var json = self.getMediaInfoJson(destination.absoluteString)
-                                                
-                                                json["isCancel"]=false
-                                                let jsonString = Utility.keyValueToJson(json)
-                                                self.clearLeftOver()
-                                                return result(jsonString);
-                                            })
-                                            
-                                        }
+                                    if(self.audioReader?.status != .reading){
+                                        self.audioReader?.startReading()
                                     }
+                                
+                                    self.videoWriter?.startSession(atSourceTime: CMTime.zero)
+                                    //
+                                    let processingQueue2 = DispatchQueue(label: "processingQueue2")
+                                    
+                                    var durationCount:Double = 0;
+                                    audioWriterInput.requestMediaDataWhenReady(on: processingQueue2, using: {() -> Void in
+                                        
+                                        while audioWriterInput.isReadyForMoreMediaData {
+                                            
+                                            let sampleBuffer: CMSampleBuffer? = audioReaderOutput?.copyNextSampleBuffer()
+                                            if #available(iOS 13.0, *) {
+                                                if(sampleBuffer != nil){
+                                                    let opt = sampleBuffer!.outputDuration
+                                                    durationCount = (Double(opt.value)/Double(opt.timescale)) + durationCount
+                                                    audioProgresss.completedUnitCount = Int64(durationCount)
+                                                    let audioProgressValue =   audioProgresss.fractionCompleted * 100;
+    //                                                print("audioProgressValue: \(audioProgressValue)")
+                                             
+                                                    self.updateProgresss(videoProgressValue: videoProgressValue, audioProgressValue:audioProgressValue )
+                                                }
+                                          
+                                    
+                                            } else {
+                                                self.updateProgresss(videoProgressValue: videoProgressValue, audioProgressValue:100 )
+                                            }
+                                            if self.audioReader?.status == .reading && sampleBuffer != nil {
+                                                if isFirstBuffer {
+                                                    let dict = CMTimeCopyAsDictionary(CMTimeMake(value: 1024, timescale: 44100), allocator: kCFAllocatorDefault);
+                                                    CMSetAttachment(sampleBuffer as CMAttachmentBearer, key: kCMSampleBufferAttachmentKey_TrimDurationAtStart, value: dict, attachmentMode: kCMAttachmentMode_ShouldNotPropagate);
+                                                    isFirstBuffer = false
+                                                }
+                                                audioWriterInput.append(sampleBuffer!)
+                                            } else {
+                                                audioWriterInput.markAsFinished()
+                                                
+                                                self.videoWriter?.finishWriting(completionHandler: {() -> Void in
+                                        
+                                                    self.updateProgresss(videoProgressValue: 100, audioProgressValue: 100 )
+                                                    var json = self.getMediaInfoJson(destination.absoluteString)
+                                                    
+                                                    json["isCancel"]=false
+                                                    let jsonString = Utility.keyValueToJson(json)
+                                                    self.clearLeftOver()
+                                                    return result(jsonString);
+                                                })
+                                                
+                                            }
+                                        }
+                                    })
+                                }
+                            }
+                            
+                            
+                            else if(self.videoWriter?.status == .cancelled){
+                                var json = self.getMediaInfoJson(destination.absoluteString)
+                                json["isCancel"]=true
+                                json["errorMessage"] = "User canceled"
+                                let jsonString = Utility.keyValueToJson(json)
+                                self.clearLeftOver()
+                                return result(jsonString);
+                            }
+                            
+                            else {
+                                self.videoWriter?.finishWriting(completionHandler: {() -> Void in
+                                    //                                    result(destination)
+                                    //                                    print(destination)
+                                    self.updateProgresss(videoProgressValue: 100, audioProgressValue: 100 )
+                                    var json = self.getMediaInfoJson(destination.absoluteString)
+                                    json["isCancel"]=false
+                                    let jsonString = Utility.keyValueToJson(json)
+                                    self.clearLeftOver()
+                                    return result(jsonString);
                                 })
                             }
                         }
-                        
-                        
-                        else if(self.videoWriter?.status == .cancelled){
+                        else{
                             var json = self.getMediaInfoJson(destination.absoluteString)
                             json["isCancel"]=true
-                            json["errorMessage"] = "User canceled"
+                            json["errorMessage"] = "Video is corrupted"
                             let jsonString = Utility.keyValueToJson(json)
                             self.clearLeftOver()
                             return result(jsonString);
                         }
                         
-                        else {
-                            self.videoWriter?.finishWriting(completionHandler: {() -> Void in
-                                //                                    result(destination)
-                                //                                    print(destination)
-                                self.updateProgresss(videoProgressValue: 100, audioProgressValue: 100 )
-                                var json = self.getMediaInfoJson(destination.absoluteString)
-                                json["isCancel"]=false
-                                let jsonString = Utility.keyValueToJson(json)
-                                self.clearLeftOver()
-                                return result(jsonString);
-                            })
-                        }
                     }
-                    else{
-                        var json = self.getMediaInfoJson(destination.absoluteString)
-                        json["isCancel"]=true
-                        json["errorMessage"] = "Video is corrupted"
-                        let jsonString = Utility.keyValueToJson(json)
-                        self.clearLeftOver()
-                        return result(jsonString);
-                    }
-                    
                 }
-            }
-        })
+            })
+            
+        }catch{
+            var json = self.getMediaInfoJson(destination.absoluteString)
+            json["isCancel"]=true
+            json["errorMessage"] = "Video is corrupted"
+            let jsonString = Utility.keyValueToJson(json)
+            self.clearLeftOver()
+            return result(jsonString);
+        }
         
+    
+      
     }
     
     private func clearLeftOver(){
@@ -403,10 +417,16 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
         progressQueue = DispatchQueue.init(label: "fc_video_compressor_pluginprogressQueue")
     }
     private func cancelCompression(_ result: FlutterResult) {
-        videoWriter?.cancelWriting()
-        videoReader?.cancelReading()
-        audioReader?.cancelReading()
-        clearLeftOver()
+
+        
+        do{
+            videoWriter?.cancelWriting()
+            videoReader?.cancelReading()
+            audioReader?.cancelReading()
+            clearLeftOver()
+        }catch{
+            
+        }
         result(true)
     }
     
