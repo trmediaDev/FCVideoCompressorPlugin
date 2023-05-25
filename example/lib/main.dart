@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:fc_video_compressor_plugin/data/media_info.dart';
 import 'package:fc_video_compressor_plugin/fc_video_compressor_plugin.dart';
-import 'package:fc_video_compressor_plugin_example/media_info_page.dart';
 import 'package:file_sizes/file_sizes.dart' as file_sizes;
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -23,6 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -218,14 +218,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 child: const Text('Open File'),
               ),
-            if (mediaInfo?.path != null)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => MediaInfoPage(filePath: mediaInfo!.path!)));
-                },
-                child: const Text('Media Info'),
-              ),
+            // if (mediaInfo?.path != null)
+            //   ElevatedButton(
+            //     onPressed: () {
+            //       Navigator.of(context).push(MaterialPageRoute(
+            //           builder: (context) => MediaInfoPage(filePath: mediaInfo!.path!)));
+            //     },
+            //     child: const Text('Media Info'),
+            //   ),
           ],
         ),
       ),

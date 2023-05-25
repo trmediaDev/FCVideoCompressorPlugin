@@ -1,13 +1,6 @@
 PODS:
   - fc_video_compressor_plugin (0.0.1):
     - Flutter
-  - ffmpeg-kit-ios-full-gpl (5.1.LTS)
-  - ffmpeg_kit_flutter_full_gpl (5.1.0.LTS):
-    - ffmpeg_kit_flutter_full_gpl/full-gpl-lts (= 5.1.0.LTS)
-    - Flutter
-  - ffmpeg_kit_flutter_full_gpl/full-gpl-lts (5.1.0.LTS):
-    - ffmpeg-kit-ios-full-gpl (= 5.1.LTS)
-    - Flutter
   - file_selector_ios (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -15,8 +8,9 @@ PODS:
     - Flutter
   - open_file (0.0.1):
     - Flutter
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
   - photo_manager (2.0.0):
     - Flutter
     - FlutterMacOS
@@ -25,24 +19,17 @@ PODS:
 
 DEPENDENCIES:
   - fc_video_compressor_plugin (from `.symlinks/plugins/fc_video_compressor_plugin/ios`)
-  - ffmpeg_kit_flutter_full_gpl (from `.symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios`)
   - file_selector_ios (from `.symlinks/plugins/file_selector_ios/ios`)
   - Flutter (from `Flutter`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - open_file (from `.symlinks/plugins/open_file/ios`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
-
-SPEC REPOS:
-  trunk:
-    - ffmpeg-kit-ios-full-gpl
 
 EXTERNAL SOURCES:
   fc_video_compressor_plugin:
     :path: ".symlinks/plugins/fc_video_compressor_plugin/ios"
-  ffmpeg_kit_flutter_full_gpl:
-    :path: ".symlinks/plugins/ffmpeg_kit_flutter_full_gpl/ios"
   file_selector_ios:
     :path: ".symlinks/plugins/file_selector_ios/ios"
   Flutter:
@@ -51,8 +38,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   open_file:
     :path: ".symlinks/plugins/open_file/ios"
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
   video_player_avfoundation:
@@ -60,16 +47,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   fc_video_compressor_plugin: cdc3327f856152f21b731f4d45674a34e6d597a1
-  ffmpeg-kit-ios-full-gpl: dcf885aaed916b54b2ad65750a70e6e979796265
-  ffmpeg_kit_flutter_full_gpl: 148faffddb883315f8acbab326d1366b1282764f
   file_selector_ios: 6e9b6d7300556c730f224905726f0a2d5d874e51
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
   open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
-  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   photo_manager: 4f6810b7dfc4feb03b461ac1a70dacf91fba7604
-  video_player_avfoundation: e489aac24ef5cf7af82702979ed16f2a5ef84cff
+  video_player_avfoundation: 81e49bb3d9fb63dccf9fa0f6d877dc3ddbeac126
 
-PODFILE CHECKSUM: 3840022d96225eca0f9c42836da61de059da8cef
+PODFILE CHECKSUM: 99f4c4d68f99462f05bacfafdce911c81085a681
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

@@ -308,8 +308,12 @@ public class SwiftFcVideoCompressorPlugin: NSObject, FlutterPlugin {
                                     if(self.audioReader?.status != .reading){
                                         self.audioReader?.startReading()
                                     }
+                                    
+                                    if(self.videoWriter?.status == .writing){ // temoprary add this for testing.
+                                        self.videoWriter?.startSession(atSourceTime: CMTime.zero)
+                                    }
                                 
-                                    self.videoWriter?.startSession(atSourceTime: CMTime.zero)
+                                
                                     //
                                     let processingQueue2 = DispatchQueue(label: "processingQueue2")
                                     
