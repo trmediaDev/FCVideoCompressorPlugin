@@ -58,9 +58,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _compressVideo(BuildContext context) async {
-    await AssetPicker.permissionCheck();
+    await AssetPicker.permissionCheck(
+        requestOption: const PermissionRequestOption(
+      androidPermission: AndroidPermission(
+        type: RequestType.video,
+        mediaLocation: true,
+      ),
+    ));
     final List<AssetEntity>? result = await AssetPicker.pickAssets(context,
-        pickerConfig: AssetPickerConfig(
+        pickerConfig: const AssetPickerConfig(
           requestType: RequestType.video,
         ));
 
@@ -129,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final startedAt = DateTime.now();
     mediaInfo = await FcVideoCompressorPlugin.compressVideo(
-        inputPath: originalFile!.path,
+      inputPath: originalFile!.path,
       outputPath: outputPath,
       height: nearestEvenHeight,
       width: nearestEvenWidth,
@@ -189,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               "Progress: $progress %",
-              style: Theme.of(context).textTheme.headline6,
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             Column(
               children: [

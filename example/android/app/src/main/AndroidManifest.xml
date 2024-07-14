@@ -1,7 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
     package="com.free_convert.fc_video_compressor_plugin_example">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- Remove READ_MEDIA_IMAGES if you don't need to load photos. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" tools:node="remove" />
+    <!-- Remove READ_MEDIA_VIDEO if you don't need to load videos. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!-- Remove READ_MEDIA_AUDIO if you don't need to load audios. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:node="remove" />
    <application
         android:label="fc_video_compressor_plugin_example"
+        android:requestLegacyExternalStorage="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
