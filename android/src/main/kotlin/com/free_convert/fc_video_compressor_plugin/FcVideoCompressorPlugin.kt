@@ -20,7 +20,6 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.PluginRegistry.Registrar
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.Future
@@ -219,15 +218,4 @@ class FcVideoCompressorPlugin : MethodCallHandler, FlutterPlugin {
         _context = context
         _channel = channel
     }
-
-    companion object {
-        private const val TAG = "fc_video_compressor_plugin"
-
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            val instance = FcVideoCompressorPlugin()
-            instance.init(registrar.context(), registrar.messenger())
-        }
-    }
-
 }
